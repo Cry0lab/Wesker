@@ -1,16 +1,17 @@
 ---
+- name: "Handlers Example"
 - hosts: scarface
-  become: yes
+  become: true
   tasks:
-    - name: update httpd.conf
+    - name: Update httpd.conf
       replace:
         path: /etc/httpd/conf/httpd.conf
         regexp: '^ServerAdmin.*$'
         replace: 'ServerAdmin redhood@localhost'
-        backup: yes
+        backup: true
       notify: "restart web server"
   handlers:
-    - name: "restart apache"
+    - name: "Restart apache"
       service:
         name: httpd
         state: restarted

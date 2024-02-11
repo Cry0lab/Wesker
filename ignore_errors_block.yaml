@@ -1,7 +1,8 @@
 ---
+- name: "Ignore errors with a block example"
 - hosts: scarface
   tasks:
-    - name: copy remote files
+    - name: Copy remote files
       block:
         - fetch:
             src: /tmp/blockfile

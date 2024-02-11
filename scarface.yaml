@@ -1,6 +1,7 @@
 ---
+- name: "Configure Scarface from scratch"
 - hosts: scarface
-  become: yes
+  become: true
   tasks:
     - name: install apache
       yum:
@@ -24,7 +25,7 @@
       service:
         name: httpd
         state: started
-        enabled: yes
+        enabled: true
     - name: install postgresql
       yum:
         name: postgresql-server
@@ -42,5 +43,4 @@
       service:
         name: postgresql
         state: started
-        enabled: yes
-
+        enabled: true

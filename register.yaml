@@ -1,4 +1,5 @@
 ---
+- name: "Register example"
 - hosts: scarface
   tasks:
     - name: create a file
@@ -12,5 +13,3 @@
       lineinfile:
         path: /tmp/testFile
         line: "The uid is {{ variable.uid }} and gid is {{ variable.gid }}"
-
-

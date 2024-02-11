@@ -1,8 +1,9 @@
 ---
+- name: "Ignore Errors Example"
 - hosts: scarface
   tasks:
-    - name: copy remote files
+    - name: Copy remote files
       fetch:
         src: /tmp/errorFile
         dest: /tmp
-      ignore_errors: yes
+      ignore_errors: true

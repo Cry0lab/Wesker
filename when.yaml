@@ -1,6 +1,7 @@
 ---
+- name: "When example"
 - hosts: lab
-  become: yes
+  become: true
   tasks:
     - name: copy files
       copy:

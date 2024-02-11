@@ -1,6 +1,7 @@
 ---
+- name: "Loop example"
 - hosts: scarface
-  become: yes
+  become: true
   tasks:
     - name: create a list of users
       user:
