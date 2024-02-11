@@ -1,5 +1,4 @@
 ---
-- name: "Loop example"
 - hosts: scarface
   become: true
   tasks:

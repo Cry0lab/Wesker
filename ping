@@ -1,0 +1,6 @@
+---
+- hosts: scarface
+  become: true
+  tasks:
+    - name: "Do the ping"
+      ping:

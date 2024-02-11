@@ -1,5 +1,4 @@
 ---
-- name: "When example"
 - hosts: lab
   become: true
   tasks:

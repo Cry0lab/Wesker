@@ -1,5 +1,4 @@
 ---
-- name: "Handlers Example"
 - hosts: scarface
   become: true
   tasks:

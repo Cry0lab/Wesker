@@ -1,5 +1,4 @@
 ---
-- name: "Register example"
 - hosts: scarface
   tasks:
     - name: create a file

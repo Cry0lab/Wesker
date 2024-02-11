@@ -1,8 +1,10 @@
 ---
-- name: "Configure Scarface from scratch"
 - hosts: scarface
   become: true
   tasks:
+    - name: Disable SELinux
+      selinux:
+        state: disabled
     - name: install apache
       yum:
         name: httpd

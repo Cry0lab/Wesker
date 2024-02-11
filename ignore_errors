@@ -1,5 +1,4 @@
 ---
-- name: "Ignore Errors Example"
 - hosts: scarface
   tasks:
     - name: Copy remote files
