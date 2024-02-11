@@ -1,0 +1,9 @@
+---
+- hosts: lab
+  become: yes
+  tasks:
+    - name: copy files
+      copy:
+        src: /home/redhood/index.html
+        dest: /var/www/html/index.html
+      when: ansible_hostname == "scarface"

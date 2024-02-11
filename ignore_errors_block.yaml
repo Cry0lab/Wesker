@@ -1,0 +1,14 @@
+---
+- hosts: scarface
+  tasks:
+    - name: copy remote files
+      block:
+        - fetch:
+            src: /tmp/blockfile
+            dest: /tmp
+      rescue:
+        - debug:
+            msg: "The file doesn't exist on {{ ansible_hostname }}"
+      always:
+        - debug:
+            msg: "Playbook is finished!"
