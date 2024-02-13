@@ -129,17 +129,49 @@ Basic RHCSA Skills - Vids 3-11
 
 Understand Core Components of Ansible - Vids 12-17
 	Inventories
-	Modules
-	Variables
-	Facts
-	Plays-Playbooks
+		Create an inventory with 2 seperate groups, dbservers and webservers, and one ungrouped host
+			vim /etc/ansible/hosts
+				server1.cryolab.tech
+
+				[webservers]
+				server2.cryolab.tech
+				server3.cryolab.tech
+
+				[dbservers]
+				server[4:6].cryolab.tech
 	Config Files
+		list the currect ansible configs
+			ansible-config list
+			ansible-config view
 
 Install and Configure an Ansible Control Node - Vids 18-20
-
-Configure Ansible Managed Nodes - Vids 21-22
+	Create a new host file and make it the default for ansible in /etc/ansible/inventory/inv.ini; add the roles path to be /etc/ansible/roles
+		vim /etc/ansible/ansible.cfg
+			[defaults]
+			inventory = /etc/ansible/inventory/inv.ini
+			roles_path = /etc/ansible/roles
+	Create an inline variable in the host file for scarface.cryolab.tech to also be scarface
+		scarface ansible_host=scarface.cryolab.tech
+	Create a host_vars file to hold the variable instead
+		vim /etc/ansible/inventory/host_vars/scarface
+			scarface ansible_host=scarface.cryolab.tech
 
 Script Administration Tasks - Vids 23-24
+	Use an adhoc ansible command to ping the endpoint
+		ansible scarface -m ping
+	Use an adhoc command to copy a file to the Node
+		ansible scarface -m copy -a "src=/file dest=/tmp"
+	Use an adhoc command to ls the root directory
+		ansible scarface -a "ls /"
+	Write a bash script that uses adhoc commands to installs and enables httpd, ls the root directory, and pings the host
+		#!/bin/bash
+
+		ansible scarface -b -m yum -a "name=httpd state=latest"
+		ansible scarface -b -m service -a "name=httpd state=started enabled=yes"
+
+		ansible scarface -b -a "ls /"
+
+		ansible scarface -m ping
 
 Create Ansible Plays and Playbooks - Vids 25-29
 
