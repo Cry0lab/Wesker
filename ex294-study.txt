@@ -1,0 +1,38 @@
+Basic RHCSA Skills - Vids 3-11
+	Essential Tools
+	Operate Running Systems
+	Local Storage
+	Local File Systems
+	Deploy-Configure-Maintain
+	Users and Groups
+	Security
+
+Understand Core Components of Ansible - Vids 12-17
+	Inventories
+	Modules
+	Variables
+	Facts
+	Plays-Playbooks
+	Config Files
+
+Install and Configure an Ansible Control Node - Vids 18-20
+
+Configure Ansible Managed Nodes - Vids 21-22
+
+Script Administration Tasks - Vids 23-24
+
+Create Ansible Plays and Playbooks - Vids 25-29
+
+Use Anisble Modules for System Adminstration Tasks - Vids 30-39
+
+Create and Use Templates to Create Customized Config Files - Vids 40-41
+
+Create and Work with Roles - Vids 42-44
+
+Managing Parallelism - Vids 45
+
+Protect Sensitive Data in Playbooks with Ansible Vault - Vids 46-47
+
+Ansible Documentation - Vids 48-49
+
+
