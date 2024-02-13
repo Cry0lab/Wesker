@@ -1,11 +1,131 @@
 Basic RHCSA Skills - Vids 3-11
 	Essential Tools
+		tar a file
+			tar -cvf archive.tar file1 file2
+		extract a tar
+			tar -xvf archive.tar
 	Operate Running Systems
+		Interrupt Boot and Change Root Password
+			Press e during boot
+			Go to the end of the "linux" line and remove ro crash and add ro.break enforcing=0
+			Start the system with CTRL+x
+			Remount the root filesystem
+				mount -o remount,rw /sysroot
+			cd /sysroot
+			passwd
+			Enable SELinux relabeling
+				touch /.autorelabel
+			exit
+		List active processes
+			ps -ef
 	Local Storage
-	Local File Systems
+		List current block devices and partitions
+			lsblk
+		Create a DOS partition
+			fdisk /dev/device_name
+			Show the help
+				m
+			print partition table
+				p
+			Create a DOS parition table
+				o
+			Create new primary partition
+				n
+			List partition types
+				l
+			Use the Linux LVM type
+				8e
+			Write the table to disk
+				w
+		Create a new LVM Logical Volume
+			Create a physical volume
+				pvcreate /dev/device_name
+			list physical volumes
+				pvs
+			Create a volume group
+				vgcreate vol_group /dev/device_name
+			list volume groups
+				vgs
+			create logical volume
+				lvcreate -L 1G<size goes here> -n new_lv vol_group
+			list logical volumes
+				lvs
+		Create file system on the new lvs
+			mkfs.ext4 /path/to/lv
+		Mount the file system
+			mount /path/to/lv /path/to/dir
+		Mount it persistently
+			list the UUID
+				blkid
+			add to /etc/fstab
+				UUID=UUID_NUMBER /mount/point fs_type defaults 0 0
+		Extend the Logical Volume
+			Increase the underlying logical volume
+				lvextend -L +500M /dev/vol_group/log_vol
+			Unmount it
+				umount /path/to/mount
+			resize file system
+				resize2fs /dev/vol_grp/log_vol
+			Mount it again
+				mount -a
+			Check your work
+				df -h
+		Mount an nfs file system from Scarecrow
+			yum install nfs-utils
+			systemctl start rpcbind
+			showmount -e SERVER_IP
+			mount persistently
+				SERVERIP:/mnt/nfs	/mnt/DIRECTORY	nfs	defaults 0 0
+		Delete the LVM Logical Volume you just made
+			Delete logical volume
+				lvremore vol_group/new_lv
+			Delete volume group
+				vgremove vol_group
+			Delete physical volume
+				pvremove /dev/device_name
 	Deploy-Configure-Maintain
+		List all scheduled jobs
+			atq
+		Configure time service client with chrony
+			yum install chrony
+			systemctl enable --now chronyd
+			vi /etc/chrony.conf and put in NTP server
+			systemctl restart chronyd
 	Users and Groups
+		Create a new user
+			useradd username
+		Modify the user to add the wheel group
+			usermod -aG wheel username
+		Set the user password
+			passwd username
+		Set expiration on the user's password
+			chage
+		Delete the user
+			userdel username
+		Create a new group
+			groupadd groupname
+		Delete a group
+			groupdel groupname
 	Security
+		Add a firewalld port rule for httpd
+			firewall-cmd --add-service=http --permanent
+			firewall-cmd --add-port=443 --permanent
+			firewall-cmd --add-port=8080 --permanent
+			firewall-cmd --reload
+			firewall-cmd --list-all
+		SELinux
+			See what mode you're in
+				getenforce
+			Set mode to permissive or enforcing
+				setenforce 0 | 1
+			list booleans
+				getsebool -a
+			list SELinux contexts
+				semanage fcontext -l
+			view context on file or process
+				ls -Z | ps -axZ
+			restore default contexts
+				restorecon -R /directory
 
 Understand Core Components of Ansible - Vids 12-17
 	Inventories
