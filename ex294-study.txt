@@ -174,6 +174,79 @@ Script Administration Tasks - Vids 23-24
 		ansible scarface -m ping
 
 Create Ansible Plays and Playbooks - Vids 25-29
+	Create a playbook that creates a file and displays a debug message that shows the output of that creation. 
+	Then, add a line to the file you created with the UID of the file and the gid of the file.
+		---
+		- hosts: scarface
+		  tasks:
+		  	- name: create a file
+			  file:
+			  	path: /tmp/testFile
+				state: touch
+			  register: var
+			- name: display debug message
+			  debug: msg="Register output it {{ var }}"
+			- name: edit file
+			  lineinfile:
+			  	path: /tmp/testFile
+				line: "The uid is {{ var.uid}} and the gid is {{ var.gid }}"
+	
+	Create a playbook that installs httpd, then replace the line with ServerAdmin to be redhood, making sure to make a backup. 
+	If it works, use a handler to restart apache
+		---
+		- hosts: scarface
+		  tasks:
+		  	- name: install httpd
+			  yum:
+			  	name: httpd
+				state: latest
+			  service:
+			  	name: httpd
+				state: started
+				enabled: yes
+			- name update httpd.conf
+			  replace:
+			  	path: /etc/httpd/conf/httpd.conf
+				regexp: '^ServerAdmin.*$'
+				replace: 'ServerAdmin redhood@localhost'
+				backup: yes
+			  notify: "restart web server"
+		  handlers:
+		  	- name: "restart apache"
+			  service:
+			  	name: httpd
+				state: restarted
+			  listen: "restart web server"
+	
+	Create a playbook that targets all servers and copies a file, but use a when statement so it only runs if the hostname is scarface
+		---
+		- hosts: all
+		  become: true
+		  tasks:
+		  	- name: copy file
+			  copy:
+			  	src: /path/to/file
+				dest: /path/to/file
+			  when: ansible_hostname == "scarface"
+	
+	Create a playbook that uses a loop to creates 3 users into the wheel group
+		---
+		- hosts: scarface
+		  become: true
+		  tasks:
+		  	- name: create a list of users
+			  user:
+			  	name: "{{ item }}
+				state: present
+				group: wheel
+			  loop:
+			  	- name1
+				- name2
+				- name3
+	
+	
+
+
 
 Use Anisble Modules for System Adminstration Tasks - Vids 30-39
 
