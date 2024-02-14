@@ -244,11 +244,41 @@ Create Ansible Plays and Playbooks - Vids 25-29
 				- name2
 				- name3
 	
+	Create a playbook that copies a non-existent file from the target host, but ignores errors
+		---
+		- hosts: scarface
+		  become: true
+		  tasks:
+			- name: copy fake file
+			  fetch:
+				src: /tmp/fakeFile
+				dest: /tmp
+			  ignore_errors: true
+
+	Create a playbook that copies a non-existent file from the target host, but use a block to display a custom error message with the hostname of the host that failed. Include a message that always displays when the playbook is finished.
+		---
+		- hosts: scarface
+		  become: true
+		  tasks:
+			- name: fetch fake file
+			  block:
+				- fetch:
+					src: /tmp/fakeFile
+					dest: /tmp
+			  rescue:
+				- debug:
+					msg: "The file doesn't exist on {{ ansible_hostname }}."
+			  always:
+				- debug:
+					msg: "Playbook is finished!"
+
+	
+	
 	
 
 
 
-Use Anisble Modules for System Adminstration Tasks - Vids 30-39
+Use Ansible Modules for System Adminstration Tasks - Vids 30-39
 
 Create and Use Templates to Create Customized Config Files - Vids 40-41
 
