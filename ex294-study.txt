@@ -272,13 +272,145 @@ Create Ansible Plays and Playbooks - Vids 25-29
 				- debug:
 					msg: "Playbook is finished!"
 
-	
-	
-	
-
-
+	Create a playbook that does the following:
+		On the webservers:
+		1. Installs apache
+		2. Creates users will and myles in the apache group using a loop
+		3. Create an index.html on the webservers using a simple template and 644 permissions ("This is the index.html on {{ ansible_hostname }})
+		4. Start and enable apache, reloading the daemon
+		On the dbservers
+		1. Install postgresql
+		2. Initialize the cluster (/usr/bin/postgresql-setup --initdb)
+		3. Creates users corey and aaron in the postgres group using a loop
+		4. Start and enable postgresql
+			---
+			- hosts: webservers
+			  become: true
+			  tasks:
+			  	- name: install apache
+				  yum:
+				  	name: httpd
+					state: latest
+				- name: create users for apache
+				  user:
+				  	name: {{ item }}
+					groups: apache
+				  loop:
+				  	- will
+					- myles
+				- name: create index.html
+				  template:
+				  	src: /home/wesker/index.j2
+					dest: /var/www/html/index.html
+					owner: apache
+					group: apache
+					mode: 0644
+				- name: start and enable httpd
+				  systemd:
+				  	name: httpd
+					state: started
+					daemon_reload: true
+					enabled: true
+			- hosts: dbservers
+			  become: true
+			  tasks:
+			  	- name: install postgresql
+				  yum:
+				  	name: postgresql
+					state: latest
+				- name: Initialize dbservers
+				  command: /usr/bin/postgresql-setup --initdb
+				- name: Create users
+				  user:
+				  	name: {{ item }}
+					group: postgres
+				  loop:
+				  	- corey
+					- aaron
+				- name: start and enable postgres
+				  systemd:
+				  	name: postgresql
+					state: started
+					enabled: true
 
 Use Ansible Modules for System Adminstration Tasks - Vids 30-39
+	Working with Yum
+	Create a playbook that does the following:
+	1. Installs multiple packages in the same playbook
+	2. Install an rpm from a remote repo
+	3. Install an rpm from a local file
+	4. Remove the packages you just installed
+	5. Add the epel repo
+	6. remove the repo
+		---
+		- hosts: all
+		  become: true
+		  tasks:
+		  	- name: Install multiple packages
+			  yum:
+			  	name: 
+					- nmap
+					- nfs-utils
+				state: latest
+			- name: install a repo from a remote repo
+			  yum:
+			  	name: http://website.com/path/to/rpm
+				state: present
+			- name: Install from a local file
+			  yum:
+			  	name: /path/to/rpm
+				state: present
+			- name: remove packages
+			  yum:
+			  name:
+			  	- nmap
+				- nfs-utils
+			  state: absent
+			- name: Add epel repo
+			  yum_repository:
+			  	name: epel
+				description: EPEL YUM repo
+				baseurl: https://a;slkdf;alksdjf
+			- name: remove epel repo
+			  yum_repository:
+			  	name: epel
+				file: epel
+				state: absent
+
+	Working with the firewall
+	Create a playbook that does the following to the webservers:
+	1. Add the http and https service to the firewall, immedaitely and permanantly to the public zone
+	2. Add the ports 8080-8084
+	3. Use a rich rule to forward port 443 to 8443
+	4. Change the playbook to disable those rules
+		---
+		- hosts: webservers
+		  become: true
+		  tasks:
+		  	- name: add http and https
+			  firewalld:
+			  	zone: public
+				service: {{ item }}
+				permanent: true
+				immediate: true
+				state: enabled
+			  loop:
+			  	- http
+				- https
+			- name: add 8080
+			  firewalld:
+			  	zone: public
+				port: 8080-8084/tcp
+				permanent: true
+				immediate: true
+				state: enabled
+			- name: Forward port 443 to 8443
+			  firewalld:
+			  	zone: public
+				rich_rule: rule family=ipv4 forward-port port=443 protocol=tcp to-port=8443
+				permanent: true
+				immediate: true
+				state: enabled
 
 Create and Use Templates to Create Customized Config Files - Vids 40-41
 
