@@ -412,6 +412,149 @@ Use Ansible Modules for System Adminstration Tasks - Vids 30-39
 				immediate: true
 				state: enabled
 
+	Working with storage devices
+	Create a playbook that does the following to scarface-db:
+	1. Create a new msdos partition on the added drive on scarface-db
+	2. Create a volume group using 100% of the drive
+	3. Add a ext4 filesystem to the lvm
+	4. Mount that filesystem with a backup of fstab
+		---
+		- hosts: scarface-db
+		  become: yes
+		  tasks:
+		  - name: Create a new partition on the added drive
+		    parted:
+				device: /dev/something
+				number: 1
+				state: present
+				part_end: 100%
+				label: msdos
+				flags: [lvm]
+		  - name: Create Volume Groups
+		    lvg:
+				pvs: /dev/something
+				vg: vg_ansible
+				state: present
+		  - name: create logical volume
+		    lvol:
+				vg: vg_ansible
+				lv: lv_ansible
+				size: 100%FREE
+				state: present
+		  - name: create a filesystem
+		    filesystem:
+				fstype: ext4
+				dev: /dev/mapper/vg_ansible-lv_ansible
+		  - name: mount the filesystem
+		    mount:
+				path: /mnt/test_mount
+				src: /dev/mapper/vg_ansible-lv_ansible
+				fstype: ext4
+				state: mounted
+				backup: true
+
+	Working with file content
+	Create a playbook that does the following on the webservers
+	1. Create a file with the file Modules
+	2. Add a line to a new file with copy
+	3. Add a line to a file with lineinfile, creating a new file
+	4. Replace any line in the 3rd file that ends in "module" with the replace module
+	5. Replace any line in the 2nd file that begins with "added" with the lineinfile module.
+		---
+		- hosts: webservers
+		  become: true
+		  tasks:
+		  	- name: create a file
+			  file:
+			  	path: /tmp/testFile1
+				state: touch
+			- name: add line with copy
+			  copy:
+			  	content: added by copy Modules
+				dest: /tmp/testFile2
+			- name: add line with lineinfile
+			  lineinfile:
+			  	path: /tmp/testFile3
+				line: added by lineinfile Modules
+				create: yes
+			- name: replace stuff
+			  replace:
+			  	path: /tmp/testFile3
+				regexp: ".*module$"
+				replace: "line replaced by replace module"
+			  lineinfile:
+			  	path: /tmp/testFile2
+				regexp: "^added.*$"
+				line: "line replaced by lineinfile module"
+
+	Working with Templates
+	Use the ansible adhoc command to find all facts concerning ipv4 with the setup module
+		ansible scarfacedb -m setup -a "filter=*ipv4"
+	Create a template that shows the hostname, operating system, ipv4 address, 
+	ipv6 address, interfaces (joined with a , ), and block devices (joined with a ,)
+		Hostname = {{ ansible_hostname}}
+		Operating System = {{ ansible_distribution}} {{ ansible_distribution_version}}
+		IPV4 Address = {{ ansible_default_ipv4.address }}
+		IPV6 Address = {{ ansible_default_ipv6.address }}
+		Interfaces = {{ ansible_interfaces|join(, ) }}
+		Block Devices = {{ ansible_devices|join(, ) }}
+	Create a playbook that does the following:
+	1. Push the template to all hosts to /tmp/info.txt
+		---
+		- hosts: all
+		  tasks:
+		  	- name: push out info template
+			  template:
+			  	src: /path/to/template.j2
+				dest: /tmp/info.txt
+
+	Working with archives
+	Create files on dbservers testFile{1..6} in a new directory called archive
+	Create a playbook that does the following on dbservers
+	1. Archive files 2 4 and 6 in one playbook in gz format
+	2. Archive all files with a wildcard in zip format
+	3. Archive the archive directory excluding files 1 2 and 3
+	4. unpack each archive in a new directory
+		---
+		- hosts: dbservers
+		  become: true
+		  tasks:
+		  	- name: archive 2 4 6
+			  archive:
+			  	path:
+					- /archive/testFile2
+					- /archive/testFile4
+					- /archive/testFile6
+				format: gz
+				dest: /multiFile.tgz
+			- name: Archive wildcard
+			  archive:
+			  	path: /archive/testFile*
+				format: zip
+				dest: /test.zip
+			- name: Directory exclude
+			  archive:
+			  	path: /archive
+				format: gz
+				exclude_path:
+					- /archive/testFile1
+					- /archive/testFile2
+					- /archive/testFile3
+				dest: /directory.tgz
+			- name: Unpack archives
+			  unarchive:
+			  	src: /multiFile.tgz
+				dest: /multi/
+				remote_src: true
+			  unarchive:
+			  	src: /test.zip
+				dest: /unzip/
+				remote_src: true
+			  unarchive:
+			  	src: /directory.tgz
+				dest: /directory/
+				remote_src: true
+
 Create and Use Templates to Create Customized Config Files - Vids 40-41
 
 Create and Work with Roles - Vids 42-44
