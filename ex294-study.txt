@@ -555,6 +555,113 @@ Use Ansible Modules for System Adminstration Tasks - Vids 30-39
 				dest: /directory/
 				remote_src: true
 
+	Working with Scheduling
+	Create a playbook that does the following on webservers:
+	1. Creates a cron job that updates yum on a weekly basis
+	2. Uses that at module (install it first), to copy the /var/log/httpd/error_log to /home/wesker in 2 hours. View the at queue (atq) to confirm the job is there.
+		---
+		- hosts: webservers
+		  become: true
+		  tasks:
+		  	- name: perform a weekly yum update
+			  cron:
+			  	name: "Weekly yum update"
+				minute: "*"
+				hour: "2"
+				month: "*"
+				weekday: "0"
+				user: root
+				state: present
+				job: "yum -y update"
+			- name: install at
+			  yum:
+			  	name: at
+				state: latest
+			- name: copy httpd error log
+				at:
+					command: cp /var/log/httpd/error_log /home/wesker
+					count: 2
+					units: hours
+					state: present
+
+	Working with SELinux
+	Show the current state of selinux
+		sestatus
+	Show the current SElinux Boolean values with httpd in the name
+		getsebool -a | grep httpd
+	Create a new webcontent directory on root
+	View its current se context
+		ls -dZ /webcontent/
+	Create a playbook that does the following on webservers:
+	1. Set the selinux state to permissive
+	2. Set the httpd_enable_cgi SELinux boolean value to no, persistently
+	3. Reverse the changes you made.
+	4. Give the webcontent folder the httpd_sys_content_t context. Make sure to restorecon.
+		---
+		- hosts: webservers
+	  	become: true
+	  	tasks:
+	  		- name: Set to permissive
+		  	  selinux:
+		  		policy: targeted
+				state: permissive
+			- name: 
+		  	  seboolean:
+		  		name: httpd_enable_cgi
+				state: no
+				persistent: true
+			- name: Update the SELinux context on the /webcontent folder
+		  	  sefcontext:
+		  		target: '/webcontent(/.*)?'
+				setype: httpd_sys_content_t
+				state: present
+			- name: Restore content
+		  	  commend: restorecon -irv /webcontent
+
+	Working with Users and Groups
+	Create a playbook that does the following for all servers:
+	1. Create 2 groups with a loop: Students and Teachers
+	2. Create a user, Zach, and add him to the Students group, specifying the /bin/sh shell
+	3. Create a user, Kelly, and add her to the Teachers group, UID is 1050
+	4. Create a user, Slater, that is part of both groups. UID 1051
+	5. Reverse the playbook to remove them all, including their folders.
+		for remove, add remove: yes and change state to absent.
+		---
+		- hosts: all
+		  become: true
+		  tasks:
+		  	- name: create groups
+			  group:
+			  	name: "{{ item }}"
+				state: present
+			  loop:
+			  	- Students
+				- Teachers
+			- name: Create Zach
+			  user:
+			  	name: Zach
+				comment: zach morris
+				shell: /bin/sh
+				groups: Students
+				append: yes
+				state: present
+			- name: Kelly
+			  user:
+			  	name: Kelly
+				comment: kelly kapowski
+				uid: 1050
+				groups: Teachers
+				append: yes
+				state: present
+			- name: Slater
+			  user:
+			  	name: Slater
+				comment: ac Slater
+				uid: 1051
+				groups: Students,Teachers
+				append: yes
+				state: present
+
 Create and Use Templates to Create Customized Config Files - Vids 40-41
 
 Create and Work with Roles - Vids 42-44
