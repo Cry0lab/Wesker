@@ -663,6 +663,92 @@ Use Ansible Modules for System Adminstration Tasks - Vids 30-39
 				state: present
 
 Create and Use Templates to Create Customized Config Files - Vids 40-41
+	Understanding Variables
+		Create a fact file in /etc/ansible/facts.d/ that includes 
+		a dictionary with labserver as the group name, type of lab and
+		platform of vmware
+			[labserver]
+			type=lab
+			platform=vmware
+		Use an adhoc command to use the setup module with a ansible_local filter on any Node
+			ansible scarefacedb -m setup -a filter=ansible_local"
+		Create a directory in the default ansible folder named vars
+			mkdir /etc/ansible/vars
+		Create a file called users.yml and input some user names for teachers and Students
+			students:
+				- zach
+				- kelly
+				- slater
+				- lisa
+			teachers:
+				- belding
+				- bliss
+				- tuttle
+				- dewey
+		Create a new playbook that does the following on all hosts:
+			1. Utilize the users.yml file you created
+			2. Create the all users in the file, using with_items instead of a loop.
+				---
+				- hosts: all
+			  	become: true
+			  	vars_files:
+			  		- /etc/ansible/vars/users.yml
+			  	tasks:
+			  		- name: create users
+				  	user:
+				  		name: "{{ item }}"
+						state: present
+				  	with_items: 
+				  		- "{{ students }}"
+						- "{{ teachers}}"
+			3. Alter the file to remove them after it works, 
+			    but change to a loop and a flatten(1) filter.
+				---
+				- hosts: all
+			  	become: true
+			  	vars_files:
+			  		- /etc/ansible/vars/users.yml
+			  	tasks:
+			  		- name: create users
+				  	user:
+				  		name: "{{ item }}"
+						state: absent
+						remove: yes
+				  	loop: "{{ [students,teachers]|flatten(1) }}"
+	Create and Use Templates
+		mkdir /etc/ansible/templates
+		Create a Jinja2 file called template.j2 that lists the ansible_hostname,
+		admin, http_port, home_dir, ipv4 address, memory 
+		used (both real and used) out of the total in mb, 
+		the first block device and it's partitions, joined with a new line and a -.
+
+			The admin is {{ admin }}.
+			The hostname is {{ ansible_hostname }}.
+			The http port is {{ http_port }}.
+			The home directory is {{ home_dir }}.
+			The ipv4 address is {{ ansible_default_ipv4['address'] }}.
+			Current memory usage is {{ ansible_memory_mb['real']['used'] }}mb out of {{ ansible_memory_mb['real']['total'] }}mb.
+			The {{ ansible_devices| first }} block device has the following paritions:
+				-{{ ansible_devices['sda']['partitions']|join('/n -') }}
+		Create a playbook that pushes the template to /tmp/server_info.txt on all servers, making a backup.
+		Make sure to add the vars for home_dir, http_port, and admin.
+			---
+			- hosts: all
+			- become: true
+			  vars:
+			  	home_dir: /home/
+				http_port: 80
+				admin: wesker
+			  tasks:
+			  	- name: create the file
+				  file:
+				  	path: /tmp/server_info.txt
+					state: touch
+				- name: push the template
+				  template:
+				  	src: /etc/ansible/templates/template.j2
+					dest: /tmp/server_info.txt
+					backup: yes
 
 Create and Work with Roles - Vids 42-44
 
