@@ -751,7 +751,58 @@ Create and Use Templates to Create Customized Config Files - Vids 40-41
 					backup: yes
 
 Create and Work with Roles - Vids 42-44
+	Create the ansible roles directory in /etc/ansible/roles, creating a "apache" role with the standard file structure.
+		Inside the roles folder: ansible-galaxy init apache
+	Deploy the following in the tasks main.yml: (Vars for the content directory will be apache_content_dir, index.html.j2 and httpd.conf.j2 is the jinja2 file for templates,)
+	1. Create the webcontent directory with 0755 permissions
+	2. Set and restore the selinux context to httpd_sys_content_t
+	3. Install apache
+	4. Deploy httpd.conf, notify to "restart apache"
+	5. Deploy index.html to apache_content_dir/index.html
+	6. start and enable the service
+		---
+		- name: create webcontent directory\
+		  file:
+		  	path: "{{ apache_content_dir }}"
+			state: directory
+			mode: '0755'
+		- name: set secontext
+		  sefcontext:
+		  	target: '{{ apache_content_dir }}(/.*)?'
+			setype: httpd_sys_content_t
+			state: present
+		- name: run restorecon
+		  command: restorecon -irv {{ apache_content_dir }}
+		- name: install apache
+		  yum:
+		  	name: httpd
+			state: latest
+		- name: deploy httpd.conf
+		  template:
+		  	src: httpd.conf.j2
+			dest: /etc/httpd/conf/httpd.conf
+			backup: yes
+			notify: "restart apache"
+		- name: depolyt index.html
+		  template:
+		  	src: index.html.j2
+			dest: "{{ apache_content_dir }}/index.html"
+			backup: yes
+		- name: Start and enable httpd
+		  service:
+		  	name: httpd
+			enable: true
+			state: started
 
+	In the defualts main.yml, set the following:
+	1. apache_content_dir to /webcontent
+	2. apache_http_port to 8080
+	3. apache_admin to root
+		---
+		apache_content_dir: /webcontent
+		apache_http_port: 8080
+		apache_admin: root
+	
 Managing Parallelism - Vids 45
 
 Protect Sensitive Data in Playbooks with Ansible Vault - Vids 46-47
