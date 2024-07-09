@@ -794,7 +794,7 @@ Create and Work with Roles - Vids 42-44
 			enable: true
 			state: started
 
-	In the defualts main.yml, set the following:
+	In the defaults main.yml, set the following:
 	1. apache_content_dir to /webcontent
 	2. apache_http_port to 8080
 	3. apache_admin to root
@@ -802,8 +802,33 @@ Create and Work with Roles - Vids 42-44
 		apache_content_dir: /webcontent
 		apache_http_port: 8080
 		apache_admin: root
+
+	In the main.yml for handlers, create a handler that listens for "restart apache"
+		---
+		- name: restart web servers
+		  service:
+		  	name: httpd
+			state: restarted
+		  listen: "restart apache"
 	
-Managing Parallelism - Vids 45
+	Create a playbook in the playbooks folder called role.yml to run the apache role
+		---
+		- hosts: webservers
+		  become: yes
+		  roles:
+		  	- apache
+
+	Run that playbook
+		ansible-playbook role.yml
+
+	Use ansible-galaxy to search for a postgresql role from geerlingguy and install it
+		ansible-galaxy search postgresql --author geerlingguy
+		ansible-galaxy install geerlingguy.postgresql
+	List the roles currently installed
+		ansible-galaxy list
+	Remove the postgresql role you installed
+		ansible-galaxy remove geerlingguy.postgresql
+
 
 Protect Sensitive Data in Playbooks with Ansible Vault - Vids 46-47
 
