@@ -1,3 +1,5 @@
+Objectives are on page 50 of the PDF
+
 Basic RHCSA Skills - Vids 3-11
 	Essential Tools
 		tar a file
@@ -831,7 +833,29 @@ Create and Work with Roles - Vids 42-44
 
 
 Protect Sensitive Data in Playbooks with Ansible Vault - Vids 46-47
+	Create an encrypted file out of the users.yml file you made earlier
+		ansible-vault encrypt users.yml
+	Edit the file to add jessie and screech to the students 
+		ansible-vault edit users.yml
+	Run the playbook with a password prompt
+		ansible-playbook --ask-vault-pass playbook.yml
+	Run it again with a password file, removing the users
+		In vars, create mypass
+			put the password in the file
+		ansible-playbook --vault-password-file mypass ../playbooks/variables.yml
+	Change the password on the users.yml file
+		ansible-vault rekey users.yml
+	Decrypt the users.yml file
+		ansible-vault decrypt users.yml
 
 Ansible Documentation - Vids 48-49
+	List the help for the ansible-doc command
+		ansible-doc -h
+	List all modules that are available
+		ansible-doc -L
+	Show documentation for a module
+		ansible-doc module_name
+	Show documentation snippet of a module
+		ansible-doc -s module_name
 
 
